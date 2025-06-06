@@ -18,18 +18,18 @@ survival_rate = st.number_input("Estimated Survival Rate (%)", min_value=0.0, ma
 gender = st.selectbox("Gender", ["Male", "Female", "Other"])
 location = st.selectbox("Tumor Location", ["Frontal", "Parietal", "Temporal", "Occipital", "Cerebellum", "Other"])
 
-# Fake encoders for demo (you can replace with actual encoding)
-def encode_input(gender, location):
-    gender_map = {"Male": 0, "Female": 1, "Other": 2}
-    location_map = {"Frontal": 0, "Parietal": 1, "Temporal": 2, "Occipital": 3, "Cerebellum": 4, "Other": 5}
-    return gender_map.get(gender, -1), location_map.get(location, -1)
+# Encoding manually
+gender_map = {"Male": 0, "Female": 1, "Other": 2}
+location_map = {"Frontal": 0, "Parietal": 1, "Temporal": 2, "Occipital": 3, "Cerebellum": 4, "Other": 5}
 
-gender_encoded, location_encoded = encode_input(gender, location)
+gender_encoded = gender_map.get(gender, -1)
+location_encoded = location_map.get(location, -1)
 
-# Validate inputs
+# Validate categorical inputs
 if gender_encoded == -1 or location_encoded == -1:
-    st.error("❌ Invalid categorical input provided.")
+    st.error("❌ Invalid gender or location input.")
 else:
+    # 👇 Make sure feature names match model's training data
     input_df = pd.DataFrame([{
         "Age": age,
         "Tumor_Size": tumor_size,
@@ -39,5 +39,8 @@ else:
     }])
 
     if st.button("Predict Tumor Type"):
-        prediction = model.predict(input_df)[0]
-        st.success(f"✅ Predicted Tumor Type: **{prediction}**")
+        try:
+            prediction = model.predict(input_df)[0]
+            st.success(f"✅ Predicted Tumor Type: **{prediction}**")
+        except ValueError as e:
+            st.error(f"❌ Model input error: {str(e)}")
