@@ -3,39 +3,40 @@ import pandas as pd
 import numpy as np
 import pickle
 
-# 1️⃣ Set Streamlit page configuration FIRST
+# Load the trained model
+with open('random_forest_classifier.pkl', 'rb') as file:
+    model = pickle.load(file)
+
+# Streamlit page configuration
 st.set_page_config(page_title="Brain Tumor Type Predictor", layout="centered")
 
-# 2️⃣ Add background image using HTML and CSS
+# Background image CSS - same style as your BMI app
 st.markdown(
     """
     <style>
     .stApp {
-        background-image: url('https://images.unsplash.com/photo-1581091012184-5c4f44c19d63?auto=format&fit=crop&w=1350&q=80');
+        background-image: url('https://www.byoprotein.com/wp-content/uploads/2018/01/fitness-man-desktop-wallpaper-51316-53014-hd-wallpapers.jpg');
         background-size: cover;
         background-position: center;
+        background-repeat: no-repeat;
         background-attachment: fixed;
     }
-    .block-container {
-        background-color: rgba(255, 255, 255, 0.85);
-        padding: 2rem;
-        border-radius: 1rem;
+    /* To make text visible on background, add some transparency */
+    .css-1d391kg {
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        padding: 20px;
+        border-radius: 10px;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# 3️⃣ Load trained model
-with open('random_forest_classifier.pkl', 'rb') as file:
-    model = pickle.load(file)
-
-# 4️⃣ App title
-st.markdown("<div class='block-container'>", unsafe_allow_html=True)
+# App title and description inside a container with background overlay for readability
 st.title("🧠 Brain Tumor Type Predictor")
 st.markdown("Enter patient details below and click **Submit** to predict the tumor type.")
 
-# 5️⃣ Input form
+# Form for user inputs
 with st.form(key='tumor_form'):
     age = st.slider("Age", 0, 100, 30)
     gender = st.selectbox("Gender", ['Male', 'Female'])
@@ -50,9 +51,9 @@ with st.form(key='tumor_form'):
     # Submit button
     submit_button = st.form_submit_button(label='Submit')
 
-# 6️⃣ Handle submission
+# When form is submitted
 if submit_button:
-    # Create DataFrame from input
+    # Create input DataFrame
     input_data = pd.DataFrame({
         'Age': [age],
         'Gender': [gender],
@@ -65,32 +66,33 @@ if submit_button:
         'Follow_Up_Required': [follow_up]
     })
 
-    # One-hot encode to match training data
-    input_encoded = pd.get_dummies(input_data)
+    # One-hot encoding to match training format
+    input_data_encoded = pd.get_dummies(input_data)
 
-    # Ensure feature alignment with training
+    # Ensure columns match model training features
     expected_features = model.feature_names_in_
     for col in expected_features:
-        if col not in input_encoded.columns:
-            input_encoded[col] = 0
-    input_encoded = input_encoded[expected_features]
+        if col not in input_data_encoded.columns:
+            input_data_encoded[col] = 0  # Add missing columns with zero
 
-    # Predict
-    prediction = model.predict(input_encoded)
+    input_data_encoded = input_data_encoded[expected_features]  # Reorder columns
 
-    # Map prediction to label
+    # Predict tumor type (model outputs 0 or 1 or more classes)
+    prediction = model.predict(input_data_encoded)
+
+    # Manual mapping of numeric labels to tumor type names
     label_map = {
         0: 'Benign',
         1: 'Malignant',
-        2: 'Other'  # If applicable
+        2: 'Other'  # Add more if needed based on your model
     }
 
     predicted_class = label_map.get(prediction[0], 'Unknown')
 
     # Display result
-    if predicted_class == 'Unknown':
-        st.warning("Prediction label not recognized. Please check the model or label mapping.")
-    else:
-        st.success(f"🎯 Predicted Tumor Type: **{predicted_class}**")
+    st.success(f"🎯 Predicted Tumor Type: **{predicted_class}**")
 
-st.markdown("</div>", unsafe_allow_html=True)
+# Footer with your name and email aligned right
+st.markdown("------------")
+st.markdown("<div style='text-align: right;'><h4 style='color: white;'>Developed by: Vishal Pate</h4></div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: right;'><h4 style='color: white;'>Email: vprakashpate@gmail.com</h4></div>", unsafe_allow_html=True)
