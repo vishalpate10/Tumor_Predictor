@@ -1,29 +1,43 @@
 import streamlit as st
-import numpy as np
+import pandas as pd
 import pickle
 
-# Load the trained model
-model = pickle.load(open("random_forest_classifier.pkl", "rb"))
+# Load model
+with open("random_forest_classifier.pkl", "rb") as f:
+    model = pickle.load(f)
 
-# Title
-st.set_page_config(page_title="ML Classifier")
-st.title("🔍 Machine Learning Prediction App")
+st.title("🧠 Brain Tumor Type Predictor")
+
+st.markdown("Enter the patient's details:")
 
 # Input fields
-st.header("Enter Feature Values")
+age = st.number_input("Age", min_value=0, max_value=120, value=30)
+tumor_size = st.number_input("Tumor Size (mm)", min_value=0.0, value=15.0)
+survival_rate = st.number_input("Estimated Survival Rate (%)", min_value=0.0, max_value=100.0, value=80.0)
 
-feature1 = st.number_input("Feature 1", step=0.01)
-feature2 = st.number_input("Feature 2", step=0.01)
-feature3 = st.number_input("Feature 3", step=0.01)
-feature4 = st.number_input("Feature 4", step=0.01)
-# Add more input fields below if your model has more features
+gender = st.selectbox("Gender", ["Male", "Female", "Other"])
+location = st.selectbox("Tumor Location", ["Frontal", "Parietal", "Temporal", "Occipital", "Cerebellum", "Other"])
 
-# Predict button
-if st.button("🔮 Predict"):
-    try:
-        # Prepare input for prediction
-        input_features = np.array([[feature1, feature2, feature3, feature4]])
-        result = model.predict(input_features)[0]
-        st.success(f"✅ Predicted Output: {result}")
-    except Exception as e:
-        st.error(f"❌ Error: {str(e)}")
+# Fake encoders for demo (you can replace with actual encoding)
+def encode_input(gender, location):
+    gender_map = {"Male": 0, "Female": 1, "Other": 2}
+    location_map = {"Frontal": 0, "Parietal": 1, "Temporal": 2, "Occipital": 3, "Cerebellum": 4, "Other": 5}
+    return gender_map.get(gender, -1), location_map.get(location, -1)
+
+gender_encoded, location_encoded = encode_input(gender, location)
+
+# Validate inputs
+if gender_encoded == -1 or location_encoded == -1:
+    st.error("❌ Invalid categorical input provided.")
+else:
+    input_df = pd.DataFrame([{
+        "Age": age,
+        "Tumor_Size": tumor_size,
+        "Survival_Rate": survival_rate,
+        "Gender": gender_encoded,
+        "Tumor_Location": location_encoded
+    }])
+
+    if st.button("Predict Tumor Type"):
+        prediction = model.predict(input_df)[0]
+        st.success(f"✅ Predicted Tumor Type: **{prediction}**")
