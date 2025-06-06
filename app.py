@@ -3,6 +3,19 @@ import pandas as pd
 import numpy as np
 import pickle
 
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-image: url('https://www.shutterstock.com/image-vector/human-brain-wireframe-low-poly-600nw-2503522967.jpg');
+        background-size: cover;
+        background-position: center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Load the trained model
 with open('random_forest_classifier.pkl', 'rb') as file:
     model = pickle.load(file)
