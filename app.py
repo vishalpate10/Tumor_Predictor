@@ -3,31 +3,39 @@ import pandas as pd
 import numpy as np
 import pickle
 
+# 1️⃣ Set Streamlit page configuration FIRST
+st.set_page_config(page_title="Brain Tumor Type Predictor", layout="centered")
+
+# 2️⃣ Add background image using HTML and CSS
 st.markdown(
     """
     <style>
     .stApp {
-        background-image: url('https://www.shutterstock.com/image-vector/human-brain-wireframe-low-poly-600nw-2503522967.jpg');
+        background-image: url('https://images.unsplash.com/photo-1581091012184-5c4f44c19d63?auto=format&fit=crop&w=1350&q=80');
         background-size: cover;
         background-position: center;
+        background-attachment: fixed;
+    }
+    .block-container {
+        background-color: rgba(255, 255, 255, 0.85);
+        padding: 2rem;
+        border-radius: 1rem;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# Load the trained model
+# 3️⃣ Load trained model
 with open('random_forest_classifier.pkl', 'rb') as file:
     model = pickle.load(file)
 
-# Streamlit page configuration
-st.set_page_config(page_title="Brain Tumor Type Predictor", layout="centered")
-
-# App title
+# 4️⃣ App title
+st.markdown("<div class='block-container'>", unsafe_allow_html=True)
 st.title("🧠 Brain Tumor Type Predictor")
 st.markdown("Enter patient details below and click **Submit** to predict the tumor type.")
 
-# Form for user inputs
+# 5️⃣ Input form
 with st.form(key='tumor_form'):
     age = st.slider("Age", 0, 100, 30)
     gender = st.selectbox("Gender", ['Male', 'Female'])
@@ -42,9 +50,9 @@ with st.form(key='tumor_form'):
     # Submit button
     submit_button = st.form_submit_button(label='Submit')
 
-# When form is submitted
+# 6️⃣ Handle submission
 if submit_button:
-    # Create input DataFrame
+    # Create DataFrame from input
     input_data = pd.DataFrame({
         'Age': [age],
         'Gender': [gender],
@@ -57,28 +65,32 @@ if submit_button:
         'Follow_Up_Required': [follow_up]
     })
 
-    # One-hot encoding to match training format
-    input_data_encoded = pd.get_dummies(input_data)
+    # One-hot encode to match training data
+    input_encoded = pd.get_dummies(input_data)
 
-    # Ensure columns match model training features
+    # Ensure feature alignment with training
     expected_features = model.feature_names_in_
     for col in expected_features:
-        if col not in input_data_encoded.columns:
-            input_data_encoded[col] = 0  # Add missing columns with zero
+        if col not in input_encoded.columns:
+            input_encoded[col] = 0
+    input_encoded = input_encoded[expected_features]
 
-    input_data_encoded = input_data_encoded[expected_features]  # Reorder columns
+    # Predict
+    prediction = model.predict(input_encoded)
 
-    # Predict tumor type (model outputs 0 or 1 or more classes)
-    prediction = model.predict(input_data_encoded)
-
-    # Manual mapping of numeric labels to tumor type names
+    # Map prediction to label
     label_map = {
         0: 'Benign',
         1: 'Malignant',
-        2: 'Other'  # Add more if needed based on your model
+        2: 'Other'  # If applicable
     }
 
     predicted_class = label_map.get(prediction[0], 'Unknown')
 
     # Display result
-    st.success(f"🎯 Predicted Tumor Type: **{predicted_class}**")
+    if predicted_class == 'Unknown':
+        st.warning("Prediction label not recognized. Please check the model or label mapping.")
+    else:
+        st.success(f"🎯 Predicted Tumor Type: **{predicted_class}**")
+
+st.markdown("</div>", unsafe_allow_html=True)
