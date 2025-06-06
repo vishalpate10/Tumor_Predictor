@@ -14,7 +14,7 @@ st.markdown(
     """
     <style>
     .stApp {
-        background-image: url('https://www.byoprotein.com/wp-content/uploads/2018/01/fitness-man-desktop-wallpaper-51316-53014-hd-wallpapers.jpg');
+        background-image: url('https://www.shutterstock.com/image-vector/human-brain-wireframe-low-poly-600nw-2503522967.jpg');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
