@@ -1,7 +1,7 @@
 # 🧠 Brain Tumor Type Predictor
 This is a web-based machine learning application built using Streamlit that predicts the type of brain tumor based on user inputs like age, tumor size, location, histology, and other medical details.
 
-
+App Link:- https://tumorpredictor-by-vishal.streamlit.app/
 
 **🚀 Features**
 Predicts brain tumor type using a trained Random Forest Classifier
