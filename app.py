@@ -14,7 +14,7 @@ st.markdown(
     """
     <style>
     .stApp {
-        background-image: url('https://ana-neurosurgery.com/wp-content/uploads/understanding-what-brain-tumor-terms.jpg');
+        background-image: url('https://as1.ftcdn.net/v2/jpg/11/22/81/46/1000_F_1122814638_PKU7COjXd2j0cwsTV1XEXcuQxF3frrvr.jpg');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
